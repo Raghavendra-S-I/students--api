@@ -31,7 +31,7 @@ func main() {
 		Addr:    cfg.Addr,
 		Handler: router,
 	}
-	fmt.Printf("server started", cfg.HTTPServer.Addr)
+	fmt.Println("server started", cfg.HTTPServer.Addr)
 
 	done := make(chan os.Signal, 1)
 

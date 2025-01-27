@@ -12,7 +12,7 @@ type HTTPServer struct {
 	Addr string `yaml:"address" env-required:"true"`
 }
 
-// env-default:"productio"
+// env-default:"production"
 type Config struct {
 	Env         string `yaml:"env" env:"ENV" env-required:"true"`
 	StoragePath string `yaml:"storage_path" env-required:"true"`
@@ -28,15 +28,15 @@ func MustLoad() *Config {
 		flags := flag.String("config", "", "path to configuration file")
 		flag.Parse()
 
-		configPath = *flags
-
+		configPath = *flags //parsing the flag in configpath
 		if configPath == "" {
 			log.Fatal("Config path is not set")
 		}
 	}
 
+	// 	//the path that we have provided should check whether the file is present or not
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		log.Fatal("config file does not exist : %s", configPath)
+		log.Fatalf("config file does not exist : %s", configPath)
 	}
 
 	var cfg Config
