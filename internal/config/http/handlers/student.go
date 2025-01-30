@@ -35,12 +35,24 @@ func New(storage storage.Storage) http.HandlerFunc {
 
 		if err := validator.New().Struct(student); err != nil {
 			validateErrs := err.(validator.ValidationErrors)
-			response.WriteJson(w, http.StatusBadRequest, response.ValidationErrors(validateErrs))
+			response.WriteJson(w, http.StatusBadRequest, response.ValidationError(validateErrs))
 			return
 		}
 
-		slog.Info("creating a student")
+		lastId, err := storage.CreateStudent(student.Name, student.Email, student.Age)
+		slog.Info("user created successfully", slog.String("userId", fmt.Sprint(lastId)))
+		if err != nil {
+			response.WriteJson(w, http.StatusInternalServerError, err)
+			return
+		}
 
-		response.WriteJson(w, http.StatusCreated, map[string]string{"success": "ok"})
+		response.WriteJson(w, http.StatusCreated, map[string]int64{"id": lastId})
+	}
+}
+
+func GetById(storage storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		slog.Info("getting a student", slog.String("id", id))
 	}
 }

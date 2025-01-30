@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 )
 
 type Response struct {
@@ -32,7 +32,7 @@ func GeneralError(err error) Response {
 	}
 }
 
-func validationError(errs validator.ValidationErrors) Response {
+func ValidationError(errs validator.ValidationErrors) Response {
 	var errMsgs []string
 
 	for _, err := range errs {
