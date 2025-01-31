@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/Raghavendra/students-api/internal/config"
 	"github.com/Raghavendra/students-api/internal/types"
@@ -19,7 +20,7 @@ func New(cfg *config.Config) (*Sqlite, error) {
 	}
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS students (
 	id INTEGER PRIMARY KEY AUTOINCREMENT, 
-	name TEXT, email TEXT, 
+	name TEXT, 
 	email TEXT,
 	age INTEGER
 	)`)
@@ -64,6 +65,41 @@ func (s *Sqlite) GetStudentsById(id int64) (types.Student, error) {
 
 	var student types.Student
 
-	stmt.QueryRow()
+	err = stmt.QueryRow(id).Scan(&student.Id, &student.Name, &student.Email, &student.Age)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return types.Student{}, fmt.Errorf("no student found with id %d", id)
+		}
+		return types.Student{}, fmt.Errorf("query error: %w", err) // ✅ `%w` correctly wraps errors
+	}
 
+	return student, nil
+
+}
+
+func (s *Sqlite) GetStudents() ([]types.Student, error) {
+	stmt, err := s.Db.Prepare("SELECT id,name, email, age FROM students")
+	if err != nil {
+		return nil, err
+
+	}
+
+	defer stmt.Close()
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var students []types.Student
+
+	for rows.Next() {
+		var student types.Student
+		err := rows.Scan(&student.Id, &student.Name, &student.Email, &student.Age)
+		if err != nil {
+			return nil, err
+		}
+		students = append(students, student)
+	}
+	return students, nil
 }
